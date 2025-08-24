@@ -12,6 +12,7 @@ class CustomerServiceTrainer:
     def __init__(self):
         self.conversation_history = []
         self.scenario_active = False
+        self.coaching_enabled = False  # Coach starts disabled
         
         # Scenario setup with comprehensive briefing
         self.scenario = {
@@ -233,23 +234,52 @@ Start by explaining your billing concern.
         self.scenario_active = True
         return customer_response
 
-    def show_quick_reference(self):
-        """Show condensed reference during active scenario"""
-        if not self.scenario_active:
-            print("No active scenario. Start a scenario first.")
-            return
+    def analyze_conversation_for_coaching(self):
+        """Analyze recent conversation to provide coaching hints"""
+        if not self.conversation_history or len(self.conversation_history) < 3:
+            return None
             
-        briefing = self.scenario["company_briefing"]
-        print("\n" + "="*50)
-        print("QUICK REFERENCE")
-        print("="*50)
-        print(f"Company: {briefing['company_name']}")
-        print(f"Enhancement: {briefing['service_enhancement_package']['name']} - {briefing['service_enhancement_package']['cost']}")
-        print(f"Value: {briefing['service_enhancement_package']['value']}")
-        print(f"Can Remove: {briefing['policies']['fee_removal']}")
-        print(f"Can Refund: {briefing['policies']['refunds']}")
-        print(f"Retention Offer: {briefing['policies']['retention_offers']}")
-        print("="*50)
+        # Get the last few exchanges for context
+        recent_conversation = self.conversation_history[-4:]  # Last 2 exchanges
+        
+        coaching_prompt = f"""
+Analyze this customer service conversation and provide a brief coaching hint for the representative:
+
+RECENT CONVERSATION:
+{self.format_recent_conversation(recent_conversation)}
+
+CONTEXT: This is a billing dispute where the customer (Sarah Chen) is upset about an unexpected $45 charge.
+
+Provide ONE specific coaching hint in 1-2 sentences that would help the representative improve their next response. Focus on:
+- Empathy and acknowledgment
+- Active listening 
+- Addressing customer's actual concerns
+- Professional problem-solving approach
+
+Format: Just the coaching advice, no extra text. Keep it concise and actionable.
+        """
+        
+        coaching_messages = [{"role": "user", "content": coaching_prompt}]
+        coaching_hint = self.make_api_call(coaching_messages, max_tokens=200)
+        
+        return coaching_hint
+
+    def format_recent_conversation(self, recent_messages):
+        """Format recent conversation for coaching analysis"""
+        formatted = []
+        is_customer = True  # Start with customer (skip system prompt)
+        
+        for msg in recent_messages:
+            if msg['role'] == 'assistant':
+                formatted.append(f"Customer: {msg['content']}")
+            elif 'Continue playing Sarah Chen' in msg['content']:
+                # Extract the actual representative response from the prompt
+                content = msg['content']
+                if 'just said: "' in content:
+                    rep_response = content.split('just said: "')[1].split('"')[0]
+                    formatted.append(f"Representative: {rep_response}")
+                    
+        return "\n\n".join(formatted[-4:])  # Last 2 exchanges
 
     def handle_user_response(self, user_input):
         """Process user's customer service response"""
@@ -278,6 +308,48 @@ Remember:
         self.conversation_history.append({"role": "assistant", "content": customer_response})
         
         return customer_response
+
+    def show_quick_reference(self):
+        """Show condensed reference during active scenario"""
+        if not self.scenario_active:
+            print("No active scenario. Start a scenario first.")
+            return
+            
+        briefing = self.scenario["company_briefing"]
+        print("\n" + "="*50)
+        print("QUICK REFERENCE")
+        print("="*50)
+        print(f"Company: {briefing['company_name']}")
+        print(f"Enhancement: {briefing['service_enhancement_package']['name']} - {briefing['service_enhancement_package']['cost']}")
+        print(f"Value: {briefing['service_enhancement_package']['value']}")
+        print(f"Can Remove: {briefing['policies']['fee_removal']}")
+        print(f"Can Refund: {briefing['policies']['refunds']}")
+        print(f"Retention Offer: {briefing['policies']['retention_offers']}")
+        print("="*50)
+
+    def toggle_coaching(self):
+        """Toggle coaching on/off"""
+        self.coaching_enabled = not self.coaching_enabled
+        status = "ENABLED" if self.coaching_enabled else "DISABLED"
+        print(f"\n🎯 Coaching is now {status}")
+        if self.coaching_enabled:
+            print("You'll receive coaching hints after customer responses.")
+        else:
+            print("Coaching hints are turned off. Use 'coach' to re-enable.")
+
+    def show_coaching_hint(self):
+        """Display coaching hint if enabled and scenario is active"""
+        if not self.coaching_enabled or not self.scenario_active:
+            return
+            
+        print("\n🎯 Getting coaching hint...")
+        coaching_hint = self.analyze_conversation_for_coaching()
+        
+        if coaching_hint:
+            print(f"💡 COACH HINT: {coaching_hint.strip()}")
+        else:
+            print("💡 COACH: Keep the conversation going!")
+        print()
 
     def end_scenario_with_feedback(self):
         """Generate feedback on the user's performance"""
@@ -330,11 +402,12 @@ Keep feedback constructive and specific.
     def run(self):
         """Main CLI loop with enhanced commands"""
         print("Welcome to Customer Service Training!")
-        print("Commands: 'start' (begin scenario), 'end' (get feedback), 'ref' (quick reference), 'quit' (exit)")
+        print("Commands: 'start' (scenario), 'end' (feedback), 'ref' (reference), 'coach' (toggle coaching), 'quit'")
         
         while True:
             if self.scenario_active:
-                command = input("\n[In Call] > ").strip().lower()
+                coach_status = "🎯ON" if self.coaching_enabled else "OFF"
+                command = input(f"\n[In Call - Coach:{coach_status}] > ").strip().lower()
             else:
                 command = input("\n> ").strip().lower()
             
@@ -368,11 +441,15 @@ Keep feedback constructive and specific.
             elif command == 'ref' or command == 'reference':
                 self.show_quick_reference()
                 
+            elif command == 'coach':
+                self.toggle_coaching()
+                
             elif command.startswith('help'):
                 print("\nCommands:")
                 print("- start: Begin customer service roleplay")
                 print("- end: Finish scenario and get feedback") 
                 print("- ref: Show quick reference during calls")
+                print("- coach: Toggle coaching hints on/off")
                 print("- quit: Exit the program")
                 print("- During roleplay: Type your customer service responses")
                 
@@ -381,7 +458,11 @@ Keep feedback constructive and specific.
                 print("\nProcessing your response...")
                 customer_response = self.handle_user_response(command)
                 print(f"\nCustomer: {customer_response}")
-                print("\nYour response (or 'ref' for quick reference):")
+                
+                # Show coaching hint if enabled
+                self.show_coaching_hint()
+                
+                print("\nYour response (or 'ref'/'coach' for help):")
                 
             else:
                 print("Unknown command. Type 'help' for available commands.")
