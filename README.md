@@ -1,9 +1,8 @@
-
-# Agentic Learning
+# AI Roleplay Trainer
 
 ## Overview
 
-Agentic Learning is a CLI tool for practicing customer service skills through AI-powered roleplay scenarios. The tool simulates realistic customer interactions and provides feedback to help users improve their communication, empathy, and problem-solving abilities.
+AI Roleplay Trainer is a CLI tool for practicing customer service skills through AI-powered roleplay scenarios. The tool simulates realistic customer interactions and provides feedback to help users improve their communication, empathy, and problem-solving abilities.
 
 ## Features
 
