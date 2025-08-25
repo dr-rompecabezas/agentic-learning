@@ -24,8 +24,8 @@ AI Roleplay Trainer is a CLI tool for practicing customer service skills through
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/dr-rompecabezas/agentic-learning.git
-    cd agentic-learning
+    git clone https://github.com/dr-rompecabezas/ai-roleplay-trainer.git
+    cd ai-roleplay-trainer
     ```
 
 2. **Install dependencies with [uv](https://github.com/astral-sh/uv):**
@@ -34,7 +34,7 @@ AI Roleplay Trainer is a CLI tool for practicing customer service skills through
     uv sync
     ```
 
-    Or use another modern Python tool (e.g. pipx, poetry) with Python 3.11+
+    Or use another modern Python tool (e.g. pipx, poetry) with Python 3.13+
 
 3. **Set your Anthropic API key:**
 
@@ -57,13 +57,14 @@ Follow the prompts to start a scenario, respond to the customer, and receive fee
 ### Commands
 
 - `start`: Begin the customer service scenario
-- Respond naturally to the customer
+- `coach`: Toggle coaching hints on/off
+- `ref`: Show quick reference to scenario details
 - `end`: Finish and receive feedback
 - `quit`: Exit the program
 
 ## Requirements
 
-- Python 3.11+
+- Python 3.13+
 - API key for Anthropic Claude (set up as required by the `anthropic` Python package)
 
 ## Project Structure
@@ -71,6 +72,7 @@ Follow the prompts to start a scenario, respond to the customer, and receive fee
 - `main.py`: CLI tool and scenario logic
 - `pyproject.toml`: Project metadata and dependencies
 - `README.md`: Project documentation
+- `ROADMAP.md`: Future development plans
 
 ## License
 
