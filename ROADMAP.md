@@ -89,6 +89,29 @@
 
 **Results**: Dramatically improved training effectiveness. Failures shifted from lack of context to genuine skill development needs.
 
+### Version 4: Multi-Provider API Support
+
+**Major Addition**: Flexible LLM provider architecture supporting:
+
+**Provider Abstraction**:
+- Abstract `LLMProvider` interface for consistent API usage
+- `AnthropicProvider` using Claude-4 Sonnet model
+- `OpenAIProvider` using GPT-5 via responses API
+- Factory pattern for easy provider selection
+
+**Configuration Options**:
+- CLI flag: `--provider {openai,anthropic}`
+- Environment variable: `LLM_PROVIDER=provider_name`
+- Default to Anthropic if not specified
+
+**Benefits**:
+- Cost optimization by switching between providers
+- Fallback options for API availability issues
+- Easy A/B testing of different LLM capabilities
+- Future extensibility for new providers
+
+**Results**: Enhanced system reliability and flexibility without compromising training effectiveness.
+
 ### Version 3: Optional Coaching System
 
 **New Feature**: Toggleable real-time coaching with:
@@ -103,8 +126,9 @@
 ### Current Stack (Prototype Phase)
 
 - **CLI-based Python application** (rapid iteration)
-- **Claude API integration** via Anthropic Python SDK
-- **Conversation state management** in memory
+- **Multi-provider LLM support** (Anthropic Claude / OpenAI GPT)
+- **Abstracted API integration** via provider pattern
+- **Conversation state management** in memory  
 - **Simple command interface** for training control
 
 ### Future Django Integration Points
@@ -293,10 +317,13 @@ Real-time coaching addresses issues in the moment when course correction is poss
 ## Next Steps
 
 1. **Implement Response Quality Indicators** - immediate impact on learning effectiveness
-2. **Test Optional Coaching System** - validate real-time guidance approach  
-3. **Create Scenario Variations** - expand training breadth within current architecture
-4. **Plan Django Migration** - design data models for conversation persistence
-5. **Develop Analytics Framework** - establish metrics for training effectiveness measurement
+2. **Create Scenario Variations** - expand training breadth within current architecture
+3. **Plan Django Migration** - design data models for conversation persistence
+4. **Develop Analytics Framework** - establish metrics for training effectiveness measurement
+
+## Completed Milestones
+
+✅ **Multi-Provider API Support** (Version 4) - Implemented flexible LLM provider architecture with support for both Anthropic Claude and OpenAI GPT, enabling cost optimization and improved system reliability.
 
 ## Success Metrics
 

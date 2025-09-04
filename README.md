@@ -8,9 +8,10 @@ AI Roleplay Trainer is a CLI tool for practicing customer service skills through
 
 - Interactive CLI for customer service training
 - Realistic scenario: Billing Dispute with a mildly frustrated customer
-- AI-powered roleplay using Anthropic Claude
+- **Multi-provider AI support**: Choose between Anthropic Claude or OpenAI GPT
 - Feedback and performance analysis after each scenario
-- Easy-to-extend for new scenarios
+- Configurable coaching hints during conversations
+- Easy-to-extend for new scenarios and providers
 
 ## Scenario Example
 
@@ -36,20 +37,33 @@ AI Roleplay Trainer is a CLI tool for practicing customer service skills through
 
     Or use another modern Python tool (e.g. pipx, poetry) with Python 3.13+
 
-3. **Set your Anthropic API key:**
+3. **Set your API key(s):**
+
+    For Anthropic Claude (default):
 
     ```sh
-    export ANTHROPIC_API_KEY='your-api-key-here'
+    export ANTHROPIC_API_KEY='your-anthropic-key-here'
     ```
 
-Replace `'your-api-key-here'` with your actual API key from Anthropic.
+    For OpenAI GPT:
+
+    ```sh
+    export OPENAI_API_KEY='your-openai-key-here'
+    ```
 
 ## Usage
 
-Run the CLI tool:
+Run the CLI tool with your preferred AI provider:
 
 ```sh
-python main.py
+# Use Anthropic Claude (default)
+uv run python main.py
+
+# Use OpenAI GPT
+uv run python main.py --provider openai
+
+# Or set via environment variable
+LLM_PROVIDER=openai uv run python main.py
 ```
 
 Follow the prompts to start a scenario, respond to the customer, and receive feedback.
@@ -65,11 +79,15 @@ Follow the prompts to start a scenario, respond to the customer, and receive fee
 ## Requirements
 
 - Python 3.13+
-- API key for Anthropic Claude (set up as required by the `anthropic` Python package)
+- API key for your chosen provider:
+  - Anthropic Claude: `anthropic` Python package
+  - OpenAI GPT: `openai` Python package (v1.105.0+)
 
 ## Project Structure
 
 - `main.py`: CLI tool and scenario logic
+- `llm_providers.py`: Multi-provider AI abstraction layer
+- `test_providers.py`: Provider testing utilities
 - `pyproject.toml`: Project metadata and dependencies
 - `README.md`: Project documentation
 - `ROADMAP.md`: Future development plans
