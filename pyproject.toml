@@ -1,11 +1,12 @@
 [project]
-name = "agentic-learning"
+name = "ai-roleplay-trainer"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI-Powered Agentic Roleplay Training Environment"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.64.0",
+    "openai>=1.105.0",
     "requests>=2.32.5",
 ]
 
