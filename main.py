@@ -4,16 +4,19 @@ Customer Service Training CLI Prototype
 A simple CLI tool to practice customer service skills with AI roleplay
 """
 
-import anthropic
-
-client = anthropic.Anthropic()
+import os
+import argparse
+from llm_providers import create_provider
 
 
 class CustomerServiceTrainer:
-    def __init__(self):
+    def __init__(self, provider=None):
         self.conversation_history = []
         self.scenario_active = False
         self.coaching_enabled = False  # Coach starts disabled
+
+        # Initialize LLM provider
+        self.llm_provider = create_provider(provider)
 
         # Scenario setup with comprehensive briefing
         self.scenario = {
@@ -102,20 +105,8 @@ class CustomerServiceTrainer:
         }
 
     def make_api_call(self, messages, max_tokens=1000):
-        """Make a call to the Claude API using anthropic client"""
-        try:
-            response = client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=max_tokens,
-                messages=messages,
-            )
-            # The response object from anthropic client contains 'content' as a list of dicts with 'text'
-            if response and hasattr(response, "content") and response.content:
-                return response.content[0].text
-            else:
-                return "API Error: No content returned."
-        except Exception as e:
-            return f"Error making API call: {str(e)}"
+        """Make a call to the configured LLM provider"""
+        return self.llm_provider.make_call(messages, max_tokens)
 
     def display_briefing(self):
         """Display comprehensive scenario briefing"""
@@ -410,7 +401,8 @@ class CustomerServiceTrainer:
 
     def run(self):
         """Main CLI loop with enhanced commands"""
-        print("Welcome to Customer Service Training!")
+        provider_name = type(self.llm_provider).__name__.replace("Provider", "")
+        print(f"Welcome to Customer Service Training! (Using {provider_name} API)")
         print(
             "Commands: 'start' (scenario), 'end' (feedback), 'ref' (reference), 'coach' (toggle coaching), 'quit'"
         )
@@ -485,6 +477,29 @@ class CustomerServiceTrainer:
                 print("Unknown command. Type 'help' for available commands.")
 
 
+def main():
+    """Main entry point with argument parsing"""
+    parser = argparse.ArgumentParser(description="AI-Powered Customer Service Training")
+    parser.add_argument(
+        "--provider",
+        choices=["openai", "anthropic"],
+        help="LLM provider to use (default: anthropic, or set LLM_PROVIDER env var)",
+    )
+
+    args = parser.parse_args()
+
+    try:
+        trainer = CustomerServiceTrainer(provider=args.provider)
+        trainer.run()
+    except ValueError as e:
+        print(f"Configuration Error: {e}")
+        print("Available providers: openai, anthropic")
+        print("Set LLM_PROVIDER environment variable or use --provider flag")
+    except KeyboardInterrupt:
+        print("\nGoodbye!")
+    except Exception as e:
+        print(f"Error: {e}")
+
+
 if __name__ == "__main__":
-    trainer = CustomerServiceTrainer()
-    trainer.run()
+    main()
